@@ -1,21 +1,29 @@
-from utilitarios import (autentica, categoria, canal,
-                         carrega_corpus, gera_logfile, busca_exemplo,
-                         consulta)
-
+from utilitarios import gera_logfile, consulta
 import pandas as pd
 
-categorias = categoria()
-categorias.carrega(filename='categorias.txt')
-categorias.imprime()
+API_KEY = 'AIzaSyB05-NW7qOcZOvWDWFwe9M8QNf0QTwM_ls'
+PATH_CHANNELS = 'data/canais.txt'
+PATH_CATEGORIES = 'data/categorias.txt'
+PATH_CORPUS = 'data/corpus.csv'
 
-canais = canal()
-canais.carrega(filename='canais.txt')
-canais.imprime()
+canais = {}
+with open(PATH_CHANNELS, 'r') as file_canais:
+    print('Lendo Canais...', end='\n\n')
+    for line in file_canais.readlines():
+        canal, id_canal = line.split(':')
+        canais[canal] = id_canal[:len(id_canal)-1] # remove /n
 
-corpus = carrega_corpus(series=False)
+categorias = {}
+with open(PATH_CATEGORIES, 'r') as file_categorias:
+    print('Lendo Categorias...', end='\n\n')
+    for line in file_categorias.readlines():
+        categoria, termos = line.split(':')
+        categorias[categoria] = termos.split(',')
 
-consulta(dados=corpus, categoria=categorias, canal=canais, nresultados=100, ordem='time', respostas=False) # api_key esta como argumento default
+corpus = pd.DataFrame(columns=['comentario','toxico','homofobico','vulgar','insulto'])
+#corpus = pd.read_csv(PATH_CORPUS, engine='python', names=['comentario','toxico','homofobico','vulgar','insulto']).to_dict()
+consulta(api_key=API_KEY, corpus=corpus, categorias=categorias, canais=canais,
+         nresultados=100, ordem='time', respostas=False)
 
-corpus = pd.Series(corpus)
-corpus.to_csv('corpus.csv', index=False)
-corpus.to_excel('corpus.xlsx', index=False)
+print(corpus.head(10))
+corpus.to_csv(PATH_CORPUS, index=False, header=True)
