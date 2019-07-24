@@ -2,9 +2,9 @@ from utilitarios import gera_logfile, consulta
 import pandas as pd
 
 API_KEY = 'AIzaSyB05-NW7qOcZOvWDWFwe9M8QNf0QTwM_ls'
-PATH_CHANNELS = 'data/canais.txt'
+PATH_CHANNELS = 'data/canais_lgbt.txt'
 PATH_CATEGORIES = 'data/categorias.txt'
-PATH_CORPUS = 'data/corpus.csv'
+PATH_CORPUS = 'data/corpus_lgbt.csv'
 
 canais = {}
 with open(PATH_CHANNELS, 'r') as file_canais:
@@ -17,8 +17,16 @@ categorias = {}
 with open(PATH_CATEGORIES, 'r') as file_categorias:
     print('Lendo Categorias...', end='\n\n')
     for line in file_categorias.readlines():
-        categoria, termos = line.split(':')
-        categorias[categoria] = termos.split(',')
+        line = line.split(':')
+        categoria = line[0]
+        termos = line[1:]
+        for termo in termos:
+            if termo.endswith('\n'):
+                termo = termo[:-1]
+            if categoria in categorias.keys():
+                categorias[categoria] += str(termo)
+            else:
+                categorias[categoria] = str(termo)
 
 corpus = pd.DataFrame(columns=['comentario','toxico','homofobico','vulgar','insulto'])
 #corpus = pd.read_csv(PATH_CORPUS, engine='python', names=['comentario','toxico','homofobico','vulgar','insulto']).to_dict()

@@ -1,0 +1,3 @@
+tamanho_inicio: 0
+
+indices encontrados em poe_na_roda: 

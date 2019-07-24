@@ -13,7 +13,7 @@ def gera_logfile(ultimo_indice_corpus):
     nome_logfile = date+'_'+time+'.txt'
     print('Gerando logfile '+nome_logfile)
 
-    log_file = open('logfiles/'+nome_logfile, 'a+')
+    log_file = open('data/logfiles/'+nome_logfile, 'a+')
     log_file.write('tamanho_inicio: ' + str(ultimo_indice_corpus) + '\n')
 
     return log_file
@@ -36,7 +36,7 @@ def consulta(api_key, corpus, categorias, canais, nresultados=100, ordem='time',
 
     regexes = {'homofobico': '', 'vulgar' : '', 'insulto': ''}
     for categoria, termos in categorias.items():
-        for termo in termos:
+        for termo in termos.split(','):
             regexes[categoria] += str(termo) + '|'
     # Removendo o ultimo '|'
     for categoria in regexes.keys():
@@ -54,10 +54,11 @@ def consulta(api_key, corpus, categorias, canais, nresultados=100, ordem='time',
         print('Buscando em:', nome_canal)
         logfile.write('\nindices encontrados em ' + nome_canal + ': ')
 
-        for nome, categ in categorias.items(): # Para cada categoria em um canal
-            print('\t'+nome, end=': ')
-            for termo in categ: # Para cada termo X que pertence a uma categoria Y em um canal Z
-
+        for nome, categ  in categorias.items(): # Para cada categoria em um canal
+            print('\t'+nome, end=':\n')
+            categ_list = categ.split(',')
+            for termo in categ_list: # Para cada termo X que pertence a uma categoria Y em um canal Z
+                print('\t\t'+termo, end=': ')
                 request = youtube.commentThreads().list(part=part,
                                                         allThreadsRelatedToChannelId=id_canal,
                                                         searchTerms=termo,
@@ -93,9 +94,10 @@ def consulta(api_key, corpus, categorias, canais, nresultados=100, ordem='time',
                         total_por_canal += 1
 
                 total_categoria += total_termo
+                print(total_termo)
                 total_termo = 0
 
-            print(total_categoria)
+            print('\ttotal em ', nome+':', total_categoria, '\n')
             total_categoria = 0
 
         logfile.write('\ntotal em ' + str(nome_canal) + ': ' + str(total_por_canal) + '\n')
